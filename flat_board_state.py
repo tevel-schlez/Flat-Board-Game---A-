@@ -10,46 +10,74 @@ class flat_board_state:
         return all(cell in (1,2) for cell in _flat_board_state)
 
     # each state has 4 neighbors - moving left, right, up, down
+
     def get_neighbors(self):
         neighbors = []
+        board = self.board
+        rows = self.rows
+        cols = self.cols
 
-        # Directions: (row_delta, col_delta) for Up, Down, Left, Right
-        directions = {
-            "UP": (-1, 0),
-            "DOWN": (1, 0),
-            "LEFT": (0, -1),
-            "RIGHT": (0, 1)
-        }
+        directions = [
+            ("UP", -1, 0),
+            ("DOWN", 1, 0),
+            ("LEFT", 0, -1),
+            ("RIGHT", 0, 1)
+        ]
 
-        board_list = self.get_state_board()
-        rows = len(board_list)
-        cols = len(board_list[0])
+        #finding all the cubes on the board
+        cubes = [
+            (i // cols, i % cols)
+            for i, cell in enumerate(board)
+            if cell == 3
+        ]
 
-        for action, (dr, dc) in directions.items():
-            new_board = [list(row) for row in board_list]
-            cubes = []
-            for r in range(rows):
-                for c in range(cols):
-                    #if this cude contains a cube
-                    if new_board[r][c] == 3:
-                        cubes.append((r, c))
-            moved = True
-            current_cubes = set(cubes)
-            active_cubes = set(cubes)
-            next_cubes_positions = {}
-            blocked_cubes = set()
+        #we add cubes into order so that there will be no runs into
+        for action, dr, dc in directions:
+            if action == "UP":
+                ordered_cubes = sorted(cubes, key=lambda p: p[0])
 
-            proposed_moves = {}
-            for (r, c) in current_cubes:
+            elif action == "DOWN":
+                ordered_cubes = sorted(cubes, key=lambda p: -p[0])
+
+            elif action == "LEFT":
+                ordered_cubes = sorted(cubes, key=lambda p: p[1])
+            else:  # RIGHT
+                ordered_cubes = sorted(cubes, key=lambda p: -p[1])
+
+            current_grid = list(board)
+
+            for r, c in cubes:
+                current_grid[r * cols + c] = 1
+
+            final_cube_positions = []
+
+            for r, c in ordered_cubes:
+                #calculate new row and column
                 nr, nc = r + dr, c + dc
-                #if the cubes are not in the egde or if they are not beside a wall, they can be moved
-                if not (0 <= nr < rows and 0 <= nc < cols) or new_board[nr][nc] == 2:
-                    proposed_moves[(r, c)] = (r, c)
+
+                #if the cude does run into a wall or another cube, it cannot be moved
+                if not (0 <= nr < rows and 0 <= nc < cols) or current_grid[nr * cols + nc] == 2:
+                    final_cube_positions.append((r, c))
+                #if the cube filled a hole, it should be gone
+                elif current_grid[nr * cols + nc] == 0:
+                    current_grid[nr * cols + nc] = 1
+                elif (nr, nc) in final_cube_positions:
+                    final_cube_positions.append((r, c))
                 else:
-                    #otherwise they wont be moved
-                    proposed_moves[(r, c)] = (nr, nc)
+                    final_cube_positions.append((nr, nc))
+
+            for r, c in final_cube_positions:
+                #add the cubes in their current position
+                current_grid[r * cols + c] = 3
+
+            new_flat_board = tuple(current_grid)
+
+            if new_flat_board != board:
+                neighbor_state = type(self)(new_flat_board, rows=rows, cols=cols)
+                neighbors.append((neighbor_state, 1))
 
         return neighbors
+
 
     # you can change the body of the function if you want
     # def __hash__(self):
