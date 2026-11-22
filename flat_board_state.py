@@ -3,11 +3,11 @@
 class flat_board_state:
     def __init__(self, instance_map=None, *args, **kwargs):
         # you can use the init function for several purposes
-        pass
+        self.board = tuple(instance_map) if instance_map else ()
 
     @staticmethod
     def is_goal_state(_flat_board_state):
-        pass
+        return all(cell in (1,2) for cell in _flat_board_state)
 
     def get_neighbors(self):
         pass
