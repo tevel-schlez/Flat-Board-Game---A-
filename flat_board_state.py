@@ -59,9 +59,11 @@ class flat_board_state:
     # you can change the body of the function if you want
 
     def get_state_board(self):
-        pass
+        cols = self.cols
+        return [list(self.board[i:i + cols]) for i in range(0, len(self.board), cols)]
+
 
     def get_state_str(self):
-        pass
+        return str(self.board)
 
     # you can add helper functions
