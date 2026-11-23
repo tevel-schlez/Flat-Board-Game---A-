@@ -60,8 +60,7 @@ class flat_board_state:
     def get_neighbors(self):
         neighbors = []
         board = self.board
-        rows = getattr(self, 'rows', None)
-        cols = getattr(self, 'cols', None)
+        rows, cols = self.rows, self.cols
 
         if rows is None or cols is None:
             n = int(len(board) ** 0.5)
@@ -138,11 +137,10 @@ class flat_board_state:
     # you can change the body of the function if you want
 
     def get_state_board(self):
-        rows = getattr(self, 'rows', None)
-        cols = getattr(self, 'cols', None)
-        if cols is None:
-            cols = int(len(self.board) ** 0.5)
-        return [list(self.board[i:i + cols]) for i in range(0, len(self.board), cols)]
+        return [
+            list(self.board[row * self.cols:(row + 1) * self.cols])
+            for row in range(self.rows)
+        ]
 
 
     def get_state_str(self):
