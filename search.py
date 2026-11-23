@@ -1,42 +1,82 @@
 from search_node import search_node
 from flat_board_state import flat_board_state
+from itertools import count
+from heapq import heappush
+from heapq import heappop
 
 count_generated = 0
 count_expanded = 0
 
 def create_open_set():
-    pass
-
+    return [], {}, count()
 
 def create_closed_set():
-    pass
+    return {}
+
+#helper
+def _state_key(vn):
+    state = vn.state
+    return state.rows, state.cols, state.board
 
 
 def add_to_open(vn, open_set):
-    pass
+    heap, active_nodes, insertion_order = open_set
+    key = _state_key(vn)
+
+    active_nodes[key] = vn
+    priority = vn.g + vn.h
+    heappush(heap, (priority, next(insertion_order), key, vn))
 
 
 def open_not_empty(open_set):
-    pass
+    _, active_nodes, _ = open_set
+    return bool(active_nodes)
 
 
 def get_best(open_set):
-    pass
+    heap, active_nodes, _ = open_set
+
+    while heap:
+        _, _, key, node = heappop(heap)
+
+        if active_nodes.get(key) is node:
+            del active_nodes[key]
+            return node
+
+    raise IndexError("OPEN is empty")
 
 
 def add_to_closed(vn, closed_set):
-    pass
+    closed_set[_state_key(vn)] = vn.g
 
-#returns False if curr_neighbor state not in open_set or has a lower g from the node in open_set
-#remove the node with the higher g from open_set (if exists)
+
 def duplicate_in_open(vn, open_set):
-    pass
+    _, active_nodes, _ = open_set
+    key = _state_key(vn)
+    previous_node = active_nodes.get(key)
 
-#returns False if curr_neighbor state not in closed_set or has a lower g from the node in closed_set
-#remove the node with the higher g from closed_set (if exists)
+    if previous_node is None:
+        return False
+
+    if previous_node.g <= vn.g:
+        return True
+
+    del active_nodes[key]
+    return False
+
+
 def duplicate_in_closed(vn, closed_set):
-    pass
+    key = _state_key(vn)
+    previous_g = closed_set.get(key)
 
+    if previous_g is None:
+        return False
+
+    if previous_g <= vn.g:
+        return True
+
+    del closed_set[key]
+    return False
 
 # helps to debug sometimes..
 def print_path(path):
