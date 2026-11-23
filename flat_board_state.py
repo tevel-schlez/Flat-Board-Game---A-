@@ -3,7 +3,7 @@ from math import isqrt
 
 class flat_board_state:
     def __init__(self, instance_map=None, *args, **kwargs):
-        #we must check any invalidity withing the given flat board. we know its a square/rectangle 
+        #we must check any invalidity withing the given flat board. we know its a square/rectangle
         cells = tuple(instance_map) if instance_map is not None else ()
         rows = kwargs.get("rows")
         cols = kwargs.get("cols")
@@ -52,10 +52,11 @@ class flat_board_state:
 
     @staticmethod
     def is_goal_state(_flat_board_state):
-        return all(cell in (1,2) for cell in _flat_board_state)
+        #we can just check that there are no holes left
+        board = _flat_board_state.board if isinstance(_flat_board_state, flat_board_state) else _flat_board_state
+        return 0 not in board
 
     # each state has 4 neighbors - moving left, right, up, down
-
     def get_neighbors(self):
         neighbors = []
         board = self.board
